@@ -1,0 +1,46 @@
+[Unit]
+Description=MiroFish Telegram bot (audience simulation runs)
+Documentation=https://github.com/amadad/mirofish
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mirofish
+Group=mirofish
+WorkingDirectory=/opt/mirofish/app
+Environment=PATH=/opt/mirofish/.local/bin:/opt/mirofish/node/bin:/opt/mirofish/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/opt/mirofish
+Environment=LLM_PROVIDER=claude-cli
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/mirofish/app/.venv/bin/python /opt/mirofish/bot.py
+
+# --- Тормоза. Урок 08.10: машину уронил не тяжёлый сервис, а отсутствие лимитов.
+# Рядом боевой mozgi.kz — симуляция не должна иметь физической возможности его задушить.
+MemoryHigh=900M
+MemoryMax=1200M
+CPUQuota=200%
+TasksMax=256
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=300
+StartLimitBurst=5
+OOMPolicy=stop
+
+# --- Изоляция
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/mirofish
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+StandardOutput=append:/var/log/mirofish-bot.log
+StandardError=append:/var/log/mirofish-bot.log
+
+[Install]
+WantedBy=multi-user.target
